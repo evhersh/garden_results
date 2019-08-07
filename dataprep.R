@@ -1,27 +1,3 @@
----
-title: "garden_results"
-knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
-author: "Evan Hersh"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-  html_document:
-    theme: "readable"
-    highlight: "tango"
-  
----
-```{r dataprocess, include=FALSE, cache=TRUE, echo=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r echo=FALSE}
-knitr::read_chunk("dataprep.R")
-```
-
-```{r echo=FALSE, cache=TRUE, results="hide", include=FALSE}
 # Data Exploration and averages
 
 ##########
@@ -49,6 +25,13 @@ H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
+
+###############
+# exploration #
+###############
+cor.test(H.dat$surv.2015, H.dat$surv.2019)
+cor.test(H.dat$surv.2019, H.dat$flower.2019)
+H.dat[which(H.dat$flower.2019 == 0 & H.dat$surv.2019 == 1), c("garden","flower.2019","surv.2019","budnum.2019")]
 
 
 ##### summaries #####
@@ -108,38 +91,3 @@ gg.budsum.ms.all <- ggplot(data=(budsum.ms.all), aes(x=year, y=bud.sum, colour=m
   geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
   geom_line(position=position_dodge(width=0.1))+
   facet_grid(garden~.)
-```
-
-## Data Exploration
-
-I've made some summary plots for each of the fitness traits we've measured over the course of the experiment - one plot for each trait, showing gardens~years and summarizing the data sexuals (red) and apomicts (blue).
-
-## Survival
-
-```{r, fig.height=7, fig.width=10, cache=TRUE, echo=FALSE}
-gg.surv.means.ms.all
-```
-
-## Size 
-
-Leaf length
-```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-gg.length.means.ms.all
-```
-
-Leaf Number
-```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-gg.num.means.ms.all
-```
-
-## Flowering
-
-Number of flowering individuals
-```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-gg.numflower.ms.all
-```
-
-Number of flower heads
-```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
-gg.budsum.ms.all
-```
