@@ -22,6 +22,8 @@ H.dat <<-read.csv("garden_data_final.csv", stringsAsFactors = FALSE, strip.white
 
 H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
 
+H.dat$flower[is.na(H.dat$flower)] <- 0
+H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
@@ -29,9 +31,9 @@ H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
 ###############
 # exploration #
 ###############
-cor.test(H.dat$surv.2015, H.dat$surv.2019)
-cor.test(H.dat$surv.2019, H.dat$flower.2019)
-H.dat[which(H.dat$flower.2019 == 0 & H.dat$surv.2019 == 1), c("garden","flower.2019","surv.2019","budnum.2019")]
+# cor.test(H.dat$surv.2015, H.dat$surv.2019)
+# cor.test(H.dat$surv.2019, H.dat$flower.2019)
+# H.dat[which(H.dat$flower.2019 == 0 & H.dat$surv.2019 == 1), c("garden","flower.2019","surv.2019","budnum.2019")]
 
 
 ##### summaries #####
@@ -61,6 +63,11 @@ flowers.ms.all <- H.dat %>%
   filter(flower>0, year>0) %>%
   summarize(num.flowering = sum(flower))
 
+mean.flower.ms.all <- H.dat %>%
+  group_by(ms,garden,year) %>%
+  filter(surv>0, year>0) %>%
+  summarize(mean.flowering=mean(flower))
+
 
 
 ##### Plots #####
@@ -88,6 +95,11 @@ gg.numflower.ms.all <- ggplot(data=(flowers.ms.all), aes(x=year, y=num.flowering
   facet_grid(garden~.)
 
 gg.budsum.ms.all <- ggplot(data=(budsum.ms.all), aes(x=year, y=bud.sum, colour=ms, group=ms))+
+  geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
+  geom_line(position=position_dodge(width=0.1))+
+  facet_grid(garden~.)
+
+gg.meanflower.ms.all <- ggplot(data=(mean.flower.ms.all), aes(x=year, y=mean.flowering, colour=ms, group=ms))+
   geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
   geom_line(position=position_dodge(width=0.1))+
   facet_grid(garden~.)

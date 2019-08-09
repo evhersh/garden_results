@@ -46,10 +46,15 @@ H.dat <<-read.csv("garden_data_final.csv", stringsAsFactors = FALSE, strip.white
 
 H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
 
+H.dat$flower[is.na(H.dat$flower)] <- 0
+H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
 
+###############
+# exploration #
+###############
 
 ##### summaries #####
 surv.means.ms.all <- H.dat %>%
@@ -77,6 +82,11 @@ flowers.ms.all <- H.dat %>%
   group_by(ms, garden, year) %>%
   filter(flower>0, year>0) %>%
   summarize(num.flowering = sum(flower))
+
+mean.flower.ms.all <- H.dat %>%
+  group_by(ms,garden,year) %>%
+  filter(surv>0, year>0) %>%
+  summarize(mean.flowering=mean(flower))
 
 
 
@@ -108,11 +118,16 @@ gg.budsum.ms.all <- ggplot(data=(budsum.ms.all), aes(x=year, y=bud.sum, colour=m
   geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
   geom_line(position=position_dodge(width=0.1))+
   facet_grid(garden~.)
+
+gg.meanflower.ms.all <- ggplot(data=(mean.flower.ms.all), aes(x=year, y=mean.flowering, colour=ms, group=ms))+
+  geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
+  geom_line(position=position_dodge(width=0.1))+
+  facet_grid(garden~.)
 ```
 
 ## Data Exploration
 
-I've made some summary plots for each of the fitness traits we've measured over the course of the experiment - one plot for each trait, showing gardens~years and summarizing the data sexuals (red) and apomicts (blue).
+I've made some summary plots for each of the fitness traits we've measured over the course of the experiment - one plot for each trait, showing gardens~years and summarizing the sexuals (red) and apomicts (blue).
 
 ## Survival
 
@@ -142,4 +157,9 @@ gg.numflower.ms.all
 Number of flower heads
 ```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.budsum.ms.all
+```
+
+Percent of surviving individuals that flowered.
+```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
+gg.meanflower.ms.all
 ```
