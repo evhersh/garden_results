@@ -163,3 +163,9 @@ Percent of surviving individuals that flowered.
 ```{r, fig.height=10, fig.width=12, cache=TRUE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.meanflower.ms.all
 ```
+
+## aster model
+
+I've successfully made my first aster model! It's pretty simple so far. It includes survival, flowering, and number of flowers as the fitness variables, and 'mating system' * 'garden' interaction as fixed effects (aster does have random effects capability, but the authors don't like them and admonish us to only use them if absolutely necessary, and even then don't put much faith in them...). I've extracted the lifetime fitness estimates and standard errors for each mating system in each garden and plotted them here:
+
+![](asterplot1.png)
