@@ -18,6 +18,7 @@ library(ggplot2)
 aster.dat <<-read.csv("garden_data_final_wide.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
 H.dat <<-read.csv("garden_data_final.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
 
+
 #### Factors, levels, variables, etc #####
 
 H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
@@ -28,6 +29,7 @@ H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
 
+save(aster.dat, H.dat, file="aster_example2_Hersh.RData")
 
 AA1 <- subset(H.dat, garden=="AA1")
 
@@ -77,7 +79,15 @@ mean.budnum.ms.all <- H.dat %>%
   filter(surv>0, year>0, flower>0) %>%
   summarize(mean.budnum=mean(bud.num))
 
+surv.pop <- H.dat %>%
+  group_by(pop, garden, year) %>%
+  filter(year>0)%>%
+  summarize(num.surv = sum(surv))
 
+flowers.pop <- H.dat %>%
+  group_by(ms, garden, year) %>%
+  filter(year>0) %>%
+  summarize(num.flowering = sum(flower))
 
 ##### Plots #####
 gg.surv.means.ms.all <- ggplot(data=(surv.means.ms.all), aes(x=year, y=surv.mean, colour=ms, group=ms))+

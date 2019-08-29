@@ -35,101 +35,139 @@ sd(aster.dat$leaflen.2019, na.rm=TRUE) #0.5751151
 # replace all NA's with 0's
 aster.dat[is.na(aster.dat)] <- 0
 
-aster.AA1 <- subset(aster.dat, garden=="AA1")
-aster.AO1 <- subset(aster.dat, garden=="AO1")
-# misc checking
-  #names(aster.dat)
-  #sapply(aster.dat, class) # not sure if all response variables should be "numeric" or "integer"?
+# aster model
 
-# reshape
-  # vars <- c("surv.2014", "surv.2015", "surv.2016", "surv.2017", "surv.2018", "surv.2019", 
-  #           "flower.2014", "flower.2015", "flower.2016", "flower.2017", "flower.2018", "flower.2019",
-  #           "budnum.2014", "budnum.2015", "budnum.2016", "budnum.2017", "budnum.2018", "budnum.2019",
-  #           "leafnum.2014", "leafnum.2015", "leafnum.2016", "leafnum.2017", "leafnum.2018", "leafnum.2019",
-  #           "leaflen.2014", "leaflen.2015", "leaflen.2016", "leaflen.2017", "leaflen.2018", "leaflen.2019")
+##########
+# Packages
 
-# reshape GOING WITH ONLY FLOWERING FOR NOW, ALSO REMOVING 2014
+library(tidyverse)
+library(aster)
+
+##### load data #####
+
+load("aster_example_Hersh.RData")
+
+##### data prep #####
+
+# replace all NA's with 0's
+aster.dat[is.na(aster.dat)] <- 0
+
+# we see that the whole problem is with flower.2015 and budnum.2015
+
+sum(redata$resp[redata$varb == "flower.2015"])
+
+# so we need to get rid of these variables in the graph
+
 vars <- c("surv.2015", "surv.2016", "surv.2017", "surv.2018", "surv.2019",
-          "flower.2015", "flower.2016", "flower.2017", "flower.2018", "flower.2019",
-          "budnum.2015", "budnum.2016", "budnum.2017", "budnum.2018", "budnum.2019")
+          "flower.2016", "flower.2017", "flower.2018", "flower.2019",
+          "budnum.2016", "budnum.2017", "budnum.2018", "budnum.2019")
 
-redata <- reshape(aster.AO1, varying=list(vars), direction="long",
-                  timevar="varb", times=as.factor(vars), v.names="resp") # a couple id's were duplicated in the original file, so I renamed them.
-                # these are the ids that were duplicated : ‘EH0011.30’, ‘EH0114.11’, ‘EH0195.6’, ‘EH0242.ADD’, ‘EH0244.26’
+redata <- reshape(aster.dat, varying=list(vars), direction="long",
+                  timevar="varb", times=as.factor(vars), v.names="resp") 
 
-  #names(redata)
-
-# add root?
 redata <- data.frame(redata, root = 1)
-  #names(redata)
 
-# structure of model
-
-    # pred <- c(0, 1, 2, 3, 4, 5,
-    #           1, 2, 3, 4, 5, 6, 
-    #           7, 8, 9, 10, 11, 12, 
-    #           1, 2, 3, 4, 5, 6, 
-    #           1, 2, 3, 4, 5, 6)
-
-# flowers/buds only, no 2014
 pred <- c(0, 1, 2, 3, 4,
-          1, 2, 3, 4, 5,
-          6, 7, 8, 9, 10)
-
-#famlist <- list(fam.bernoulli(),
-             fam.truncated.poisson(truncation=0), 
-             fam.normal.location(0.5052409),
-             fam.normal.location(0.5465294),
-             fam.normal.location(0.4890473),
-             fam.normal.location(0.4404425),
-             fam.normal.location(0.4589257),
-             fam.normal.location(0.5751151))
-
-    # fam <- c(1, 1, 1, 1, 1, 1, 
-    #          1, 1, 1, 1, 1, 1, 
-    #          2, 2, 2, 2, 2, 2, 
-    #          2, 2, 2, 2, 2, 2, 
-    #          3, 4, 5, 6, 7, 8)
+             2, 3, 4, 5,
+             6, 7, 8, 9)
 
 fam <- c(1, 1, 1, 1, 1, 
-         1, 1, 1, 1, 1,
-         3, 3, 3, 3, 3)
+            1, 1, 1, 1,
+            3, 3, 3, 3)
 
-sapply(fam.default(), as.character)[fam]
-
-# something something pseudo-covariates? From slides on aster model
 layer <- gsub("[0-9]", "", as.character(redata$varb))
-unique(layer)
-
 redata <- data.frame(redata, layer = layer)
 
-with(redata, class(layer))
-
 fit <- as.numeric(layer == "budnum.")
-unique(fit)
-
 redata <- data.frame(redata, fit=fit)
-with(redata, class(fit))
 
-##### Fit Model #####
-  # remove inds with missing data (put back if I take out size variables):
-  # AO2$261, SO2#321, AA2#23, AA1#86, AA1#96, AA2#197, AA2#53, AA2#131, AO2#158, AO1#74, AA1#131, AA2#114, AA2#125, AA1#283, AO2#211, AO2#229, AA2#147, AA1#173, AO1#144, AO2#170
+# these work now
+aout2 <- aster(resp ~ varb + fit : ms, pred=pred, fam=fam, varvar=varb,
+               idvar=id, root=root, data = redata)
+summary(aout2, show.graph=TRUE)
 
-# not converging for the model with flowers or with flowers+size...
+aout1 <- aster(resp ~ varb + fit : (ms*garden), pred=pred, fam=fam,
+               varvar=varb, idvar=id, root=root, data = redata)
+summary(aout1, show.graph=TRUE)
+
+anova(aout2, aout1)
+
+# model does not converge when "pop" is included
+aout3 <- aster(resp ~ varb + fit : (pop*garden), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+summary(aout3, show.graph=TRUE) # works with info.tol = 1e-15...
+
+rout <- reaster(resp ~ varb + fit : (ms * garden), list(pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
 
 
-aout1 <- aster(resp ~ varb + fit : ms, pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+# predicted values (from slides)
+pout <- predict(aout1, se.fit = TRUE) #for fixed model
+#pout <- predict(rout, se.fit = TRUE) #for mixed model, nm doesn't work
 
-summary(aout1, show.graph=TRUE,  info.tol = 1e-12)
 
-# try to fix model convergence
-info.tol <- 1e-12
-infomat <- aout1$fisher
-fred <- eigen(infomat, symmetric = TRUE)
-sally <- fred$values < max(fred$values) * info.tol
-foo <- zapsmall(fred$vectors[ , sally])
+fred <- data.frame(ms = levels(redata$ms), garden=rep(levels(redata$garden), each=2), root = 1,
+                   surv.2015=1, surv.2016=1, surv.2017=1, surv.2018=1, surv.2019=1,
+                   flower.2016=1, flower.2017=1, flower.2018=1, flower.2019=1,
+                   budnum.2016=1, budnum.2017=1, budnum.2018=1, budnum.2019=1)
+fred
 
-modmat <- aout1$modmat
-modmat <- matrix(as.vector(modmat), ncol = dim(modmat)[3])
+renewdata <- reshape(fred, varying = list(vars), direction = "long", timevar = "varb", times = as.factor(vars), v.names = "resp")
+layer <- gsub("[0-9]", "", as.character(renewdata$varb))
+renewdata <- data.frame(renewdata, layer = layer)
+fit <- as.numeric(layer == "budnum.")
+renewdata <- data.frame(renewdata, fit = fit)
 
-bar <- modmat %*% foo
+names(renewdata)
+
+pout <- predict(aout1, newdata = renewdata, varvar = varb, idvar = id, root = root, se.fit = TRUE)
+sapply(pout, class)
+
+sapply(pout, length)
+
+renewdata$id
+
+as.character(renewdata$varb)
+
+nnode <- length(vars)
+sally <- matrix(pout$fit, ncol = nnode)
+dim(sally)
+
+renewdata2 <- unite_(renewdata, "msgarden", c("ms", "garden"))
+
+rownames(sally) <- unique(as.character(renewdata2$msgarden))
+colnames(sally) <- unique(as.character(renewdata2$varb))
+
+herman <- sally[ , grepl("budnum", colnames(sally))]
+herman
+
+rowSums(herman)
+
+npop <- nrow(fred)
+nnode <- length(vars)
+amat <- array(0, c(npop, nnode, npop))
+dim(amat)
+
+foo <- grepl("budnum", vars)
+for (k in 1:npop) amat[k, foo, k] <- 1
+
+pout.amat <- predict(aout1, newdata = renewdata, varvar = varb, idvar = id, root = root, se.fit = TRUE, amat = amat)
+pout.amat$fit
+
+foo <- cbind(pout.amat$fit, pout.amat$se.fit)
+rownames(foo) <- unique(as.character(renewdata2$msgarden))
+colnames(foo) <- c("estimates", "std. err.")
+round(foo, 3)
+
+foo.1 <- as.data.frame(foo)
+foo.1 <- setNames(cbind(rownames(foo.1), foo.1, row.names = NULL), 
+                  c("ms_garden", "estimates", "std.err"))
+
+foo.1 <- separate_(foo.1, "ms_garden", c("ms", "garden"))
+
+foo.1$ms <- factor(foo.1$ms, levels=c("S", "A"))
+foo.1$garden <- factor(foo.1$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
+
+ggplot(data=foo.1, aes(y=estimates, x=garden, fill=ms))+
+  geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
+  geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
+  theme_bw()
+

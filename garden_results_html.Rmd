@@ -153,41 +153,45 @@ I've made some summary plots for each of the fitness traits we've measured over 
 
 ## Survival
 
-```{r, fig.height=7, fig.width=10, cache=FALSE, echo=FALSE}
+```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE}
 gg.surv.means.ms.all
 ```
 
 ## Size 
 
 Leaf length
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.length.means.ms.all
 ```
 
 Leaf Number
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.num.means.ms.all
 ```
 
 ## Flowering
 
 Number of flowering individuals
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.numflower.ms.all
 ```
 
 Number of flower heads
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.budsum.ms.all
 ```
 
 Percent of surviving individuals that flowered.
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.meanflower.ms.all
 ```
 
 ## aster model
 
-I've successfully made my first aster model! It's pretty simple so far. It includes survival, flowering, and number of flowers as the fitness variables, and 'mating system' * 'garden' interaction as fixed effects (aster does have random effects capability, but the authors don't like them and admonish us to only use them if absolutely necessary, and even then don't put much faith in them...). I've extracted the lifetime fitness estimates and standard errors for each mating system in each garden and plotted them here:
+I've successfully made my first aster model! It's pretty simple so far. It includes survival, flowering, and number of flowers as the fitness variables, and 'mating system' x 'garden' interaction as fixed effects (aster does have random effects capability, but the authors don't like them and admonish us to only use them if absolutely necessary, and even then don't put much faith in them...).   I've 'predicted' lifetime fitness estimates and standard errors for each mating system in each garden and plotted them here:
 
 ![](asterplot1.png)
+
+I've also succesfully run an aster model with 'ms x garden' as fixed effects and 'pop' as a random effect, but there's currently no way to 'predict' for random effects aster models because (as the authors caution) it is "very unclear" what prediction means for them and GLMMs in general. FWIW, the summary of the 'reaster' (random effects aster model) indicates that 'pop' does not have a strong impact on 'ms x garden' fixed effects - though I may be misinterpreting the model output. 
+
+I obviously still have a lot more to explore with aster models, but it's a relief that I've been able to get them coded and running properly. Judging by the above figure, it seems quite clear that for sexuals, range limit ≠ niche limit! There's also some indication of local adaptation / homesite advantage for the sexuals in the southern gardens. Other than that, there's no obvious patterns emerging in the other garden regions...For example, in the MT gardens, sexuals had much higher fitness than apo's in AA1, but much lower in AA2. 
