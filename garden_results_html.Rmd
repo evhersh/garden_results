@@ -195,42 +195,42 @@ I've made some summary plots for each of the fitness traits we've measured over 
 
 ## Survival
 
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE}
 gg.surv.means.ms.all
 ```
 
 ## Size 
 
 Leaf length
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.length.means.ms.all
 ```
 
 Leaf Number
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.num.means.ms.all
 ```
 
 ## Flowering
 
 Number of flowering individuals
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.numflower.ms.all
 ```
 
 Number of flower heads
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.budsum.ms.all
 ```
 
 Percent of surviving individuals that flowered.
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.meanflower.ms.all
 ```
 
 Number of buds per individual planted over the course of the experiment. For this I simply summed up the number of buds produced by each mating system in each garden, and divided by the number of individuals planted at the start of the experiment. This plot shows almost exactly the same pattern as the plot from the aster model below...
 
-```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.bpp
 ```
 
