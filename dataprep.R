@@ -28,6 +28,8 @@ H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
+H.dat$s.region <- factor(H.dat$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
+H.dat$garden <- factor(H.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
 
 save(aster.dat, H.dat, file="aster_example2_Hersh.RData")
 
@@ -89,7 +91,27 @@ flowers.pop <- H.dat %>%
   filter(year>0) %>%
   summarize(num.flowering = sum(flower))
 
+budsum.pop.all <- H.dat %>%
+  group_by(s.region,pop,garden,year) %>%
+  filter(surv>0, year>0, flower>0) %>%
+  summarize(bud.sum = sum(bud.num))
+
+num.planted <- H.dat %>%
+  group_by(ms, garden) %>%
+  filter(year==0) %>%
+  summarize(n=n())
+
+budsum.ms <- H.dat %>%
+  group_by(ms, garden) %>%
+  summarize(bud.sum = sum(bud.num))
+
+buds.per.planted <- data.frame(budsum.ms[,1:3], num.planted[,3])
+buds.per.planted$bpp <- buds.per.planted$bud.sum/buds.per.planted$n
+
+
 ##### Plots #####
+
+
 gg.surv.means.ms.all <- ggplot(data=(surv.means.ms.all), aes(x=year, y=surv.mean, colour=ms, group=ms))+
   geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.2))+
   geom_errorbar(data=surv.means.ms.all, aes(y=surv.mean, ymin=surv.mean-surv.se, ymax=surv.mean+surv.se), colour="black", position=position_dodge(width=0.2), width=0.2, alpha=0.5)+
@@ -128,3 +150,14 @@ gg.meanflower.ms.all <- ggplot(data=(mean.flower.ms.all), aes(x=year, y=mean.flo
   geom_line(position=position_dodge(width=0.1))+
   facet_grid(garden~.)+
   theme_bw()
+
+gg.budsum.pop.all <- ggplot(data=(budsum.pop.all), aes(x=year, y=bud.sum, colour=s.region, group=pop))+
+  geom_point(aes(fill=s.region), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
+  geom_line(position=position_dodge(width=0.1))+
+  facet_grid(garden~.)+
+  theme_bw()
+
+gg.bpp <- ggplot(data=buds.per.planted, aes(x=garden, y=bpp, colour=ms, group=ms))+
+  geom_bar(aes(fill=ms), colour="black", stat="identity", size=1, position="dodge")+
+  theme_bw()+
+  labs(y = "buds per individual planted", x = "Garden")

@@ -22,7 +22,7 @@ knitr::read_chunk("dataprep.R")
 ```
 
 ```{r echo=FALSE, cache=FALSE, results="hide", include=FALSE}
-# Data Exploration and averages
+
 
 # Data Exploration and averages
 
@@ -44,6 +44,7 @@ library(ggplot2)
 aster.dat <<-read.csv("garden_data_final_wide.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
 H.dat <<-read.csv("garden_data_final.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
 
+
 #### Factors, levels, variables, etc #####
 
 H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
@@ -53,7 +54,10 @@ H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
+H.dat$s.region <- factor(H.dat$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
+H.dat$garden <- factor(H.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
 
+save(aster.dat, H.dat, file="aster_example2_Hersh.RData")
 
 AA1 <- subset(H.dat, garden=="AA1")
 
@@ -103,9 +107,37 @@ mean.budnum.ms.all <- H.dat %>%
   filter(surv>0, year>0, flower>0) %>%
   summarize(mean.budnum=mean(bud.num))
 
+surv.pop <- H.dat %>%
+  group_by(pop, garden, year) %>%
+  filter(year>0)%>%
+  summarize(num.surv = sum(surv))
+
+flowers.pop <- H.dat %>%
+  group_by(ms, garden, year) %>%
+  filter(year>0) %>%
+  summarize(num.flowering = sum(flower))
+
+budsum.pop.all <- H.dat %>%
+  group_by(s.region,pop,garden,year) %>%
+  filter(surv>0, year>0, flower>0) %>%
+  summarize(bud.sum = sum(bud.num))
+
+num.planted <- H.dat %>%
+  group_by(ms, garden) %>%
+  filter(year==0) %>%
+  summarize(n=n())
+
+budsum.ms <- H.dat %>%
+  group_by(ms, garden) %>%
+  summarize(bud.sum = sum(bud.num))
+
+buds.per.planted <- data.frame(budsum.ms[,1:3], num.planted[,3])
+buds.per.planted$bpp <- buds.per.planted$bud.sum/buds.per.planted$n
 
 
 ##### Plots #####
+
+
 gg.surv.means.ms.all <- ggplot(data=(surv.means.ms.all), aes(x=year, y=surv.mean, colour=ms, group=ms))+
   geom_point(aes(fill=ms), colour="black", pch=21, size=3, position=position_dodge(width=0.2))+
   geom_errorbar(data=surv.means.ms.all, aes(y=surv.mean, ymin=surv.mean-surv.se, ymax=surv.mean+surv.se), colour="black", position=position_dodge(width=0.2), width=0.2, alpha=0.5)+
@@ -145,6 +177,16 @@ gg.meanflower.ms.all <- ggplot(data=(mean.flower.ms.all), aes(x=year, y=mean.flo
   facet_grid(garden~.)+
   theme_bw()
 
+gg.budsum.pop.all <- ggplot(data=(budsum.pop.all), aes(x=year, y=bud.sum, colour=s.region, group=pop))+
+  geom_point(aes(fill=s.region), colour="black", pch=21, size=3, position=position_dodge(width=0.1))+
+  geom_line(position=position_dodge(width=0.1))+
+  facet_grid(garden~.)+
+  theme_bw()
+
+gg.bpp <- ggplot(data=buds.per.planted, aes(x=garden, y=bpp, colour=ms, group=ms))+
+  geom_bar(aes(fill=ms), colour="black", stat="identity", size=1, position="dodge")+
+  theme_bw()+
+  labs(y = "buds per individual planted", x = "Garden")
 ```
 
 ## Data Exploration
@@ -153,37 +195,43 @@ I've made some summary plots for each of the fitness traits we've measured over 
 
 ## Survival
 
-```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE}
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE}
 gg.surv.means.ms.all
 ```
 
 ## Size 
 
 Leaf length
-```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.length.means.ms.all
 ```
 
 Leaf Number
-```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.num.means.ms.all
 ```
 
 ## Flowering
 
 Number of flowering individuals
-```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.numflower.ms.all
 ```
 
 Number of flower heads
-```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.budsum.ms.all
 ```
 
 Percent of surviving individuals that flowered.
-```{r, fig.height=12, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.meanflower.ms.all
+```
+
+Number of buds per individual planted over the course of the experiment. For this I simply summed up the number of buds produced by each mating system in each garden, and divided by the number of individuals planted at the start of the experiment. This plot shows almost exactly the same pattern as the plot from the aster model below...
+
+```{r, fig.height=10, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+gg.bpp
 ```
 
 ## aster model
