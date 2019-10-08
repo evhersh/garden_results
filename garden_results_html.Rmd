@@ -47,10 +47,10 @@ H.dat <<-read.csv("garden_data_final.csv", stringsAsFactors = FALSE, strip.white
 
 #### Factors, levels, variables, etc #####
 
-H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
+#H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
 
-H.dat$flower[is.na(H.dat$flower)] <- 0
-H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
+#H.dat$flower[is.na(H.dat$flower)] <- 0
+#H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
@@ -61,6 +61,59 @@ save(aster.dat, H.dat, file="aster_example2_Hersh.RData")
 
 AA1 <- subset(H.dat, garden=="AA1")
 
+# subset into years
+H.dat.y1 <- subset(H.dat, year==1)
+H.dat.y2 <- subset(H.dat, year==2)
+H.dat.y3 <- subset(H.dat, year==3)
+H.dat.y4 <- subset(H.dat, year==4)
+H.dat.y5 <- subset(H.dat, year==5)
+
+#subset into gardens
+#y1
+H.dat.y1.AA1 <- subset(H.dat.y1, garden=="AA1")
+H.dat.y1.AA2 <- subset(H.dat.y1, garden=="AA2")
+H.dat.y1.AO1 <- subset(H.dat.y1, garden=="AO1")
+H.dat.y1.AO2 <- subset(H.dat.y1, garden=="AO2")
+H.dat.y1.SO1 <- subset(H.dat.y1, garden=="SO1")
+H.dat.y1.SO2 <- subset(H.dat.y1, garden=="SO2")
+H.dat.y1.SS1 <- subset(H.dat.y1, garden=="SS1")
+H.dat.y1.SS2 <- subset(H.dat.y1, garden=="SS2")
+#y2
+H.dat.y2.AA1 <- subset(H.dat.y2, garden=="AA1")
+H.dat.y2.AA2 <- subset(H.dat.y2, garden=="AA2")
+H.dat.y2.AO1 <- subset(H.dat.y2, garden=="AO1")
+H.dat.y2.AO2 <- subset(H.dat.y2, garden=="AO2")
+H.dat.y2.SO1 <- subset(H.dat.y2, garden=="SO1")
+H.dat.y2.SO2 <- subset(H.dat.y2, garden=="SO2")
+H.dat.y2.SS1 <- subset(H.dat.y2, garden=="SS1")
+H.dat.y2.SS2 <- subset(H.dat.y2, garden=="SS2")
+#y3
+H.dat.y3.AA1 <- subset(H.dat.y3, garden=="AA1")
+H.dat.y3.AA2 <- subset(H.dat.y3, garden=="AA2")
+H.dat.y3.AO1 <- subset(H.dat.y3, garden=="AO1")
+H.dat.y3.AO2 <- subset(H.dat.y3, garden=="AO2")
+H.dat.y3.SO1 <- subset(H.dat.y3, garden=="SO1")
+H.dat.y3.SO2 <- subset(H.dat.y3, garden=="SO2")
+H.dat.y3.SS1 <- subset(H.dat.y3, garden=="SS1")
+H.dat.y3.SS2 <- subset(H.dat.y3, garden=="SS2")
+#y4
+H.dat.y4.AA1 <- subset(H.dat.y4, garden=="AA1")
+H.dat.y4.AA2 <- subset(H.dat.y4, garden=="AA2")
+H.dat.y4.AO1 <- subset(H.dat.y4, garden=="AO1")
+H.dat.y4.AO2 <- subset(H.dat.y4, garden=="AO2")
+H.dat.y4.SO1 <- subset(H.dat.y4, garden=="SO1")
+H.dat.y4.SO2 <- subset(H.dat.y4, garden=="SO2")
+H.dat.y4.SS1 <- subset(H.dat.y4, garden=="SS1")
+H.dat.y4.SS2 <- subset(H.dat.y4, garden=="SS2")
+#y5
+H.dat.y5.AA1 <- subset(H.dat.y5, garden=="AA1")
+H.dat.y5.AA2 <- subset(H.dat.y5, garden=="AA2")
+H.dat.y5.AO1 <- subset(H.dat.y5, garden=="AO1")
+H.dat.y5.AO2 <- subset(H.dat.y5, garden=="AO2")
+H.dat.y5.SO1 <- subset(H.dat.y5, garden=="SO1")
+H.dat.y5.SO2 <- subset(H.dat.y5, garden=="SO2")
+H.dat.y5.SS1 <- subset(H.dat.y5, garden=="SS1")
+H.dat.y5.SS2 <- subset(H.dat.y5, garden=="SS2")
 
 ###############
 # exploration #
@@ -127,14 +180,24 @@ num.planted <- H.dat %>%
   filter(year==0) %>%
   summarize(n=n())
 
+num.planted.pop <- H.dat %>%
+  group_by(pop, ms, garden) %>%
+  filter(year==0) %>%
+  summarize(n=n())
+
 budsum.ms <- H.dat %>%
   group_by(ms, garden) %>%
-  summarize(bud.sum = sum(bud.num))
+  summarize(bud.sum = sum(bud.num, na.rm=TRUE))
+
+budsum.pop <- H.dat %>%
+  group_by(pop, ms, garden) %>%
+  summarize(bud.sum = sum(bud.num, na.rm=TRUE))
 
 buds.per.planted <- data.frame(budsum.ms[,1:3], num.planted[,3])
 buds.per.planted$bpp <- buds.per.planted$bud.sum/buds.per.planted$n
 
-
+buds.per.planted.pop <- data.frame(budsum.pop[,1:4], num.planted.pop[,4])
+buds.per.planted.pop$bpp <- buds.per.planted.pop$bud.sum/buds.per.planted.pop$n
 ##### Plots #####
 
 
@@ -187,6 +250,12 @@ gg.bpp <- ggplot(data=buds.per.planted, aes(x=garden, y=bpp, colour=ms, group=ms
   geom_bar(aes(fill=ms), colour="black", stat="identity", size=1, position="dodge")+
   theme_bw()+
   labs(y = "buds per individual planted", x = "Garden")
+
+gg.bpp.pop <- ggplot(data=buds.per.planted.pop, aes(x=pop, y=bpp, group=ms))+
+  geom_bar(aes(fill=ms), stat="identity", colour="black", size=1)+
+  theme_bw()+
+  labs(y = "buds per individual planted", x = "population")+
+  facet_grid(garden~.)
 ```
 
 ## Data Exploration
@@ -232,6 +301,12 @@ Number of buds per individual planted over the course of the experiment. For thi
 
 ```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.bpp
+```
+
+Now the same thing but looking by population in each garden
+
+```{r, fig.height=9, fig.width=12, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
+gg.bpp.pop
 ```
 
 ## aster model
