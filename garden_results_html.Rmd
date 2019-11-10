@@ -99,11 +99,13 @@ gg.surv.means.ms.all
 ## Size 
 
 Leaf length
+
 ```{r, fig.height=6, fig.width=8, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.length.means.ms.all
 ```
 
 Leaf Number
+
 ```{r, fig.height=6, fig.width=8, cache=FALSE, echo=FALSE, warning=FALSE, message=FALSE}
 gg.num.means.ms.all
 ```
