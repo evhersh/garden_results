@@ -22,11 +22,103 @@ library(AER)
 #### YEAR 1
 ####
 
-### glmer ###
-# all gardens
-glmm.y1.all.num.MS <- glmer(leaf.num~ms*garden+(1|pop/mom), family=poisson(link="log"), data=H.dat.y1)
-summary(glmm.y1.all.num.MS)
-anova(glmm.y1.all.num.MS)
+### glmer y1###
+# doesn't converge with mom in model
+glmm.num.y1.0 <- glmer(leaf.num~ms*g.region+(1|garden/pop/mom), family=poisson(link="log"), data=H.dat.y1)
+# converges without mom
+glmm.num.y1.1 <- glmer(leaf.num~ms*g.region+(1|garden/pop), family=poisson(link="log"), data=H.dat.y1)
+
+# doesn't converge with mom
+glmm.num.y1.2 <- glmer(leaf.num~ms*garden+(1|pop/mom), family=poisson(link="log"), data=H.dat.y1)
+# converges with mom
+glmm.num.y1.3 <- glmer(leaf.num~ms*garden+(1|pop), family=poisson(link="log"), data=H.dat.y1)
+
+# g.region * ms
+glmm.num.y1.1.ggfx <- ggpredict(glmm.num.y1.1, terms=c("g.region", "ms"))
+plot(glmm.num.y1.1.ggfx) # no diffs
+# garden * ms
+glmm.num.y1.3.ggfx <- ggpredict(glmm.num.y1.3, terms=c("garden", "ms"))
+plot(glmm.num.y1.3.ggfx) # apos have more leaves in SO2 and AA2
+
+
+### glmer y2###
+# doesn't converge with mom in model
+glmm.num.y2.0 <- glmer(leaf.num~ms*g.region+(1|garden/pop/mom), family=poisson(link="log"), data=H.dat.y2)
+# converges without mom
+glmm.num.y2.1 <- glmer(leaf.num~ms*g.region+(1|garden/pop), family=poisson(link="log"), data=H.dat.y2)
+
+# doesn't converge with mom
+glmm.num.y2.2 <- glmer(leaf.num~ms*garden+(1|pop/mom), family=poisson(link="log"), data=H.dat.y2)
+# converges with mom
+glmm.num.y2.3 <- glmer(leaf.num~ms*garden+(1|pop), family=poisson(link="log"), data=H.dat.y2)
+
+lrtest(glmm.num.y2.1, glmm.num.y2.3)
+
+# g.region * ms
+glmm.num.y2.1.ggfx <- ggpredict(glmm.num.y2.1, terms=c("g.region", "ms"))
+plot(glmm.num.y2.1.ggfx)+
+  labs(y="predicted leaf number", x="source region", title="predicted leaf number in year 2")# apos have more leaves in A.g
+# garden * ms
+glmm.num.y2.3.ggfx <- ggpredict(glmm.num.y2.3, terms=c("garden", "ms"))
+plot(glmm.num.y2.3.ggfx) # apos have more leaves in SS2, SO2, AA1, and AA2
+
+
+### glmer y3###
+glmm.num.y3.0 <- glmer(leaf.num~ms*g.region+(1|garden/pop/mom), family=poisson(link="log"), data=H.dat.y3)
+
+# doesn't converge with mom
+glmm.num.y3.2 <- glmer(leaf.num~ms*garden+(1|pop/mom), family=poisson(link="log"), data=H.dat.y3)
+# converges with mom
+glmm.num.y3.3 <- glmer(leaf.num~ms*garden+(1|pop), family=poisson(link="log"), data=H.dat.y3)
+
+# g.region * ms
+glmm.num.y3.0.ggfx <- ggpredict(glmm.num.y3.0, terms=c("g.region", "ms"))
+plot(glmm.num.y3.0.ggfx) # apos have more leaves in A.g
+# garden * ms
+glmm.num.y3.3.ggfx <- ggpredict(glmm.num.y3.3, terms=c("garden", "ms"))
+plot(glmm.num.y3.3.ggfx) # apos have more leaves in SS2, AO2 and AA2
+
+
+### glmer y4###
+glmm.num.y4.0 <- glmer(leaf.num~ms*g.region+(1|garden/pop/mom), family=poisson(link="log"), data=H.dat.y4)
+summary(glmm.num.y4.0)
+# doesn't converge with mom
+glmm.num.y4.2 <- glmer(leaf.num~ms*garden+(1|pop/mom), family=poisson(link="log"), data=H.dat.y4)
+# converges with mom
+glmm.num.y4.3 <- glmer(leaf.num~ms*garden+(1|pop), family=poisson(link="log"), data=H.dat.y4)
+
+# g.region * ms
+glmm.num.y4.0.ggfx <- ggpredict(glmm.num.y4.0, terms=c("g.region", "ms"))
+plot(glmm.num.y4.0.ggfx) # no diffs
+# garden * ms
+glmm.num.y4.3.ggfx <- ggpredict(glmm.num.y4.3, terms=c("garden", "ms"))
+plot(glmm.num.y4.3.ggfx) # apos have more leaves in SO1, and WAY more AA2. Sexuals have marginally more leaves in SO2
+
+
+### glmer y5###
+# doesnt converge with mom
+glmm.num.y5.0 <- glmer(leaf.num~ms*g.region+(1|garden/pop/mom), family=poisson(link="log"), data=H.dat.y5)
+
+# doesnt converge with pop
+glmm.num.y5.1 <- glmer(leaf.num~ms*g.region+(1|garden/pop), family=poisson(link="log"), data=H.dat.y5)
+summary(glmm.num.y5.0)
+
+# doesn't converge with mom
+glmm.num.y5.2 <- glmer(leaf.num~ms*garden+(1|pop/mom), family=poisson(link="log"), data=H.dat.y5)
+# converges with mom, rank deficient because no apo survivors in SO1
+glmm.num.y5.3 <- glmer(leaf.num~ms*garden+(1|pop), family=poisson(link="log"), data=H.dat.y5)
+summary(glmm.num.y5.3)
+# g.region * ms
+# glmm.num.y5.0.ggfx <- ggpredict(glmm.num.y5.0, terms=c("g.region", "ms"))
+# plot(glmm.num.y5.0.ggfx) # no diffs
+# garden * ms
+glmm.num.y5.3.ggfx <- ggpredict(glmm.num.y5.3, terms=c("garden", "ms"))
+plot(glmm.num.y5.3.ggfx) 
+
+
+
+
+
 
 # Model singularity?
 glmm2.y1.AA1.num.MS <- glmer(leaf.num~ms+(1|pop/mom), family=poisson(link="log"), data=H.dat.y1.AA1)

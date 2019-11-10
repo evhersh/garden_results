@@ -10,6 +10,7 @@ library(gdata)
 library(plotrix)
 library(aster)
 library(lattice)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
@@ -28,17 +29,40 @@ S.dat <<-read.csv("./data/seed_2018.csv", stringsAsFactors = FALSE, strip.white 
 #H.dat$flower <- ifelse(H.dat$bud.num>=1, 1, 0)
 
 #H.dat$flower[is.na(H.dat$flower)] <- 0
-#H.dat$bud.num[is.na(H.dat$bud.num)] <- 0
+aster.dat$budnum.2014[is.na(aster.dat$budnum.2014)] <- 0
+aster.dat$budnum.2015[is.na(aster.dat$budnum.2015)] <- 0
+aster.dat$budnum.2016[is.na(aster.dat$budnum.2016)] <- 0
+aster.dat$budnum.2017[is.na(aster.dat$budnum.2017)] <- 0
+aster.dat$budnum.2018[is.na(aster.dat$budnum.2018)] <- 0
+aster.dat$budnum.2019[is.na(aster.dat$budnum.2019)] <- 0
+
+aster.dat$pop <- factor(aster.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
+aster.dat$ms <- factor(aster.dat$ms, levels=c("S", "A"))
+aster.dat$s.region <- factor(aster.dat$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
+aster.dat$garden <- factor(aster.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
+aster.dat$ms_g <- paste(aster.dat$ms, "-", aster.dat$garden)
+aster.dat$ms_p_g <- paste(aster.dat$ms, "-", aster.dat$pop, "-", aster.dat$garden)
+
+aster.dat$budsum <- aster.dat$budnum.2014 + aster.dat$budnum.2015 + aster.dat$budnum.2016 + aster.dat$budnum.2017 + aster.dat$budnum.2018 + aster.dat$budnum.2019
 
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
 H.dat$s.region <- factor(H.dat$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
+H.dat$g.region <- factor(H.dat$g.region, levels=c("S.g", "SO.g", "AO.g", "A.g"))
 H.dat$garden <- factor(H.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
 
 G.dat$pop <- factor(G.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 G.dat$ms <- factor(G.dat$ms, levels=c("S", "A"))
 G.dat$s.region <- factor(G.dat$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
+G.dat$g.region <- factor(G.dat$g.region, levels=c("S.g", "SO.g", "AO.g", "A.g"))
 G.dat$garden <- factor(G.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
+G.dat$ms_g <- paste(G.dat$ms, "-", G.dat$garden)
+G.dat$ms_p_g <- paste(G.dat$ms, "-", G.dat$pop, "-", G.dat$garden)
+
+
+S.dat$pop <- factor(S.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
+S.dat$ms <- factor(S.dat$ms, levels=c("S", "A"))
+S.dat$garden <- factor(S.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
 
 save(aster.dat, H.dat, file="aster_example2_Hersh.RData")
 
@@ -46,6 +70,7 @@ AA1 <- subset(H.dat, garden=="AA1")
 
 # subset seed data
 S.dat.nat <- subset(S.dat, source=="natural")
+S.dat.garden <- subset(S.dat, source=="garden")
 
 # subset into years
 H.dat.y1 <- subset(H.dat, year==1)
@@ -192,6 +217,16 @@ seeds.ms <- S.dat.nat %>%
   group_by(ms) %>%
   summarize(mean.gspb = mean(gspb), se.gspb = std.error(gspb))
 
+spb.ms.nat <- S.dat.nat %>%
+  group_by(ms) %>%
+  summarize(mean.spb = mean(seed.per.bud), se.spb = std.error(seed.per.bud))
+
+spb.ms.garden <- S.dat.garden %>%
+  dplyr::group_by(ms) %>%
+  dplyr::summarize(mean.spb = mean(seed.per.bud), se.spb = std.error(seed.per.bud))
+
+
+  
 # ESTABLISHMENT #
 est.ms <- G.dat %>%
   group_by(ms, garden) %>%

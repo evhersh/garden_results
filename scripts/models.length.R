@@ -19,14 +19,115 @@ library(AER)
 ### LEAF LENGTH
 #####
 
-####
-#### Year 1
-####
+# all gardens y1
+lmer.length.y1.0 <- lmer(leaf.length~ms*g.region+(1|garden/pop/mom), data=H.dat.y1)
+summary(lmer.length.y1.0)
 
-# all gardens
-lmer.y1.all.surv.MS <- lmer(leaf.length~ms*garden+(1|pop/mom), data=H.dat.y1)
-summary(lmer.y1.all.surv.MS)
-anova(lmer.y1.all.surv.MS)
+lmer.length.y1.1 <- lmer(leaf.length~ms*garden+(1|pop/mom), data=H.dat.y1)
+summary(lmer.length.y1.1)
+
+# garden model fits better?
+lrtest(lmer.length.y1.0, lmer.length.y1.1)
+
+lmer.length.y1.0.ggfx <- ggpredict(lmer.length.y1.0, terms=c("g.region", "ms"))
+plot(lmer.length.y1.0.ggfx)
+
+lmer.length.y1.1.ggfx <- ggpredict(lmer.length.y1.1, terms=c("garden", "ms"))
+plot(lmer.length.y1.1.ggfx) # sexuals have longer leaves in SS1
+
+
+# all gardens y2
+lmer.length.y2.0 <- lmer(leaf.length~ms*g.region+(1|garden/pop/mom), data=H.dat.y2)
+summary(lmer.length.y2.0)
+
+lmer.length.y2.1 <- lmer(leaf.length~ms*garden+(1|pop/mom), data=H.dat.y2)
+summary(lmer.length.y2.1)
+
+# garden model fits better?
+lrtest(lmer.length.y2.0, lmer.length.y2.1)
+
+lmer.length.y2.0.ggfx <- ggpredict(lmer.length.y2.0, terms=c("g.region", "ms"))
+plot(lmer.length.y2.0.ggfx)
+
+lmer.length.y2.1.ggfx <- ggpredict(lmer.length.y2.1, terms=c("garden", "ms"))
+plot(lmer.length.y2.1.ggfx) # sexuals have longer leaves in SS1 and SS2
+
+
+# all gardens y3
+# doesnt converge
+lmer.length.y3.0 <- lmer(leaf.length~ms*g.region+(1|garden/pop/mom), data=H.dat.y3)
+summary(lmer.length.y3.0)
+
+# doesn't converge
+lmer.length.y3.1 <- lmer(leaf.length~ms*garden+(1|pop/mom), data=H.dat.y3)
+summary(lmer.length.y3.1)
+
+# these do converge
+lmer.length.y3.2 <- lmer(leaf.length~ms*g.region+(1|garden/pop), data=H.dat.y3)
+summary(lmer.length.y3.2)
+
+lmer.length.y3.3 <- lmer(leaf.length~ms*garden+(1|pop), data=H.dat.y3)
+summary(lmer.length.y3.3)
+
+# garden model fits better?
+lrtest(lmer.length.y3.2, lmer.length.y3.3) # garden model fits better
+
+lmer.length.y3.2.ggfx <- ggpredict(lmer.length.y3.2, terms=c("g.region", "ms"))
+plot(lmer.length.y3.2.ggfx) # sexuals have longer leaves in S.g
+
+lmer.length.y3.3.ggfx <- ggpredict(lmer.length.y3.3, terms=c("garden", "ms"))
+plot(lmer.length.y3.3.ggfx) # sexuals have longer leaves in SS1 and AA1 (marginal)
+
+
+# all gardens y4
+# doesnt converge
+lmer.length.y4.0 <- lmer(leaf.length~ms*g.region+(1|garden/pop/mom), data=H.dat.y4)
+summary(lmer.length.y4.0)
+# removing random factors doesn't help g.region models converge
+lmer.length.y4.1 <- lmer(leaf.length~ms*g.region+(1|garden), data=H.dat.y4)
+summary(lmer.length.y4.0)
+
+lmer.length.y4.2 <- lmer(leaf.length~ms*garden+(1|pop/mom), data=H.dat.y4)
+summary(lmer.length.y4.2)
+
+# garden model fits better?
+#lrtest(lmer.length.y4.0, lmer.length.y4.1)
+
+# lmer.length.y4.0.ggfx <- ggpredict(lmer.length.y4.0, terms=c("g.region", "ms"))
+# plot(lmer.length.y4.0.ggfx)
+
+lmer.length.y4.2.ggfx <- ggpredict(lmer.length.y4.2, terms=c("garden", "ms"))
+plot(lmer.length.y4.2.ggfx) # sexuals have (marginally) longer leaves in SS1, SS2, and SO1 (best)
+
+
+# all gardens y5
+lmer.length.y5.0 <- lmer(leaf.length~ms*g.region+(1|garden/pop/mom), data=H.dat.y5)
+summary(lmer.length.y5.0)
+
+# doesn't converge (probably one garden with no survivors)
+lmer.length.y5.1 <- lmer(leaf.length~ms*garden+(1|pop/mom), data=H.dat.y5)
+summary(lmer.length.y5.1)
+
+lmer.length.y5.2 <- lmer(leaf.length~ms*garden+(1|pop), data=H.dat.y5)
+summary(lmer.length.y5.2)
+
+lm.length.y5.3 <- lm(leaf.length~ms*garden, data=H.dat.y5)
+summary(lm.length.y5.3) # no apos surviving in SO1 in y5
+
+# garden model fits better?
+#lrtest(lmer.length.y5.0, lmer.length.y5.1)
+
+lmer.length.y5.0.ggfx <- ggpredict(lmer.length.y5.0, terms=c("g.region", "ms"))
+plot(lmer.length.y5.0.ggfx) # no diffs
+
+lm.length.y5.3.ggfx <- ggpredict(lm.length.y5.3, terms=c("garden", "ms"))
+plot(lm.length.y5.3.ggfx)+
+  labs(y= "predicted leaf length", x="garden", title="predicted leaf length in year 5")# sexuals have longer leaves in SS2 
+
+
+
+
+
 
 # model singularity
 lmer1.y1.AA1.surv.MS <- lmer(surv~ms+(1|pop/mom), data=H.dat.y1.AA1)
