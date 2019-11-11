@@ -125,7 +125,7 @@ summary(rout2)
 rout3 <- reaster(resp ~ varb + fit : (ms * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
 summary(rout3)
 
-# predicted values (from slides)
+##### predicted values GARDEN ###### (from slides)
 pout <- predict(aout3, se.fit = TRUE) #for fixed model
 #pout <- predict(rout, se.fit = TRUE) #for mixed model, nm doesn't work
 
@@ -197,4 +197,76 @@ ggplot(data=foo.1, aes(y=estimates, x=garden, fill=ms))+
   geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
   theme_bw()
 
+######
+##### predicted values G.REGION ###### (from slides)
+######
+pout <- predict(aout4, se.fit = TRUE) #for fixed model
+#pout <- predict(rout, se.fit = TRUE) #for mixed model, nm doesn't work
 
+
+fred <- data.frame(ms = levels(redata$ms), g.region=rep(levels(redata$g.region), each=2), root = 1,
+                   surv.2015=1, surv.2016=1, surv.2017=1, surv.2018=1, surv.2019=1,
+                   flower.2016=1, flower.2017=1, flower.2018=1, flower.2019=1,
+                   budnum.2016=1, budnum.2017=1, budnum.2018=1, budnum.2019=1)
+fred
+
+renewdata <- reshape(fred, varying = list(vars), direction = "long", timevar = "varb", times = as.factor(vars), v.names = "resp")
+layer <- gsub("[0-9]", "", as.character(renewdata$varb))
+renewdata <- data.frame(renewdata, layer = layer)
+fit <- as.numeric(layer == "budnum.")
+renewdata <- data.frame(renewdata, fit = fit)
+
+names(renewdata)
+
+pout <- predict(aout4, newdata = renewdata, varvar = varb, idvar = id, root = root, se.fit = TRUE)
+sapply(pout, class)
+
+sapply(pout, length)
+
+renewdata$id
+
+as.character(renewdata$varb)
+
+nnode <- length(vars)
+sally <- matrix(pout$fit, ncol = nnode)
+dim(sally)
+
+renewdata2 <- unite_(renewdata, "msg.region", c("ms", "g.region"))
+
+rownames(sally) <- unique(as.character(renewdata2$msg.region))
+colnames(sally) <- unique(as.character(renewdata2$varb))
+
+herman <- sally[ , grepl("budnum", colnames(sally))]
+herman
+
+rowSums(herman)
+
+npop <- nrow(fred)
+nnode <- length(vars)
+amat <- array(0, c(npop, nnode, npop))
+dim(amat)
+
+foo <- grepl("budnum", vars)
+for (k in 1:npop) amat[k, foo, k] <- 1
+
+pout.amat <- predict(aout4, newdata = renewdata, varvar = varb, idvar = id, root = root, se.fit = TRUE, amat = amat)
+pout.amat$fit
+
+foo <- cbind(pout.amat$fit, pout.amat$se.fit)
+rownames(foo) <- unique(as.character(renewdata2$msg.region))
+colnames(foo) <- c("estimates", "std. err.")
+round(foo, 3)
+
+foo.1 <- as.data.frame(foo)
+foo.1 <- setNames(cbind(rownames(foo.1), foo.1, row.names = NULL), 
+                  c("msg.region", "estimates", "std.err"))
+
+foo.1 <- separate_(foo.1, "msg.region", c("ms", "g.region"))
+
+foo.1$ms <- factor(foo.1$ms, levels=c("S", "A"))
+foo.1$g.region <- factor(foo.1$g.region, levels=c("S", "SO", "AO", "A"))
+
+ggplot(data=foo.1, aes(y=estimates, x=g.region, fill=ms))+
+  geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
+  geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
+  theme_bw()

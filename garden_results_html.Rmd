@@ -43,6 +43,11 @@ Here are the results from my aster model. It includes survival, flowering, and n
 
 Judging by the above figure, it seems quite clear that for sexuals, range limit ≠ niche limit! There's also some indication of local adaptation / homesite advantage for the sexuals in the southern gardens. Other than that, there's no obvious patterns emerging in the other garden regions...For example, in the MT gardens, sexuals had much higher fitness than apo's in AA1, but much lower in AA2.
 
+When looking at lifetime fitness predictions by g.region instead of garden, we find this:
+
+![](aster_region.png)
+Sexuals have higher lifetime fitness in their own region, but have lower fitness at their `range edge' and no difference (when averaged between the two gardens) beyond their range. 
+
 ## Buds per individual planted (BPP) ##
 
 Number of buds per individual planted over the course of the experiment. For this I simply summed up the number of buds produced by each mating system in each garden, and divided by the number of individuals planted at the start of the experiment. This plot shows almost exactly the same pattern as the plot from the aster model above...
@@ -57,7 +62,9 @@ The similarity of the BPP plot and the aster model results lead to my bootstrapp
 
 ![](EBPP_boot.png)
 
-As you can see, all the confidence intervals overlap, indicating that (when taking into account establishment success) there are no differences in fitness between sexuals and apomicts in any of the gardens. 
+As you can see, all the confidence intervals overlap, indicating that (when taking into account establishment success) there are no differences in fitness between sexuals and apomicts in any of the gardens. The same is true when looking a garden region:
+
+![](boot_gregion.png)
 
 ## Size models ##
 
