@@ -17,7 +17,7 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r, code = readLines("./scripts/dataprep.R"), echo=FALSE, warning=FALSE, message=FALSE, cache=FALSE}
+```{r, code = readLines("./scripts/dataprep.R"), echo=FALSE, warning=FALSE, message=FALSE, cache=FALSE, include=FALSE}
 ```
 
 
@@ -35,6 +35,10 @@ I've plotted the predicted means from each model (r package ggeffects) here.
 ![](Est_sregion.png)
 ![](Est_garden.png)
 
+Here's the same for s.region * g.region, which I think better reflects our experimental design...
+
+![](est_ggfx_sregionXgregion.png)
+
 ## aster model
 
 Here are the results from my aster model. It includes survival, flowering, and number of flowers as the fitness variables, 'mating system' x 'garden' interaction as fixed effects, and population as a random effect. Similar to the establishment GLMMs above, LRT showed that the model with garden as a fixed effect fits better than g.region as fixed with garden as random.  I've 'predicted' lifetime fitness estimates and standard errors for each mating system in each garden and plotted them here:
@@ -47,6 +51,10 @@ When looking at lifetime fitness predictions by g.region instead of garden, we f
 
 ![](aster_region.png)
 Sexuals have higher lifetime fitness in their own region, but have lower fitness at their `range edge' and no difference (when averaged between the two gardens) beyond their range. 
+
+In what I just realized is a better reflection of our experimental design, I re-made the aster model with s.region * g.region as fixed effects...Here's what it looks like:
+
+![](aster_sregionXgregion.png)
 
 ## Buds per individual planted (BPP) ##
 
@@ -65,6 +73,10 @@ The similarity of the BPP plot and the aster model results lead to my bootstrapp
 As you can see, all the confidence intervals overlap, indicating that (when taking into account establishment success) there are no differences in fitness between sexuals and apomicts in any of the gardens. The same is true when looking a garden region:
 
 ![](boot_gregion.png)
+
+Here's the same for s.region * g.region
+
+![](boot_s.regionXg.region.png)
 
 ## Size models ##
 

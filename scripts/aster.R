@@ -92,9 +92,11 @@ fit <- as.numeric(layer == "budnum.")
 redata <- data.frame(redata, fit=fit)
 
 # these work now
-aout1 <- aster(resp ~ varb + fit : ms, pred=pred, fam=fam, varvar=varb,
+aout0 <- aster(resp ~ varb + fit : (ms), pred=pred, fam=fam, varvar=varb,
                idvar=id, root=root, data = redata)
-summary(aout2, show.graph=TRUE)
+
+aout1 <- aster(resp ~ varb + fit : (garden), pred=pred, fam=fam, varvar=varb,
+               idvar=id, root=root, data = redata)
 
 aout2 <- aster(resp ~ varb + fit : (ms+garden), pred=pred, fam=fam,
                varvar=varb, idvar=id, root=root, data = redata)
@@ -104,19 +106,30 @@ aout3 <- aster(resp ~ varb + fit : (ms*garden), pred=pred, fam=fam,
 
 aout4 <- aster(resp ~ varb + fit : (ms*g.region), pred=pred, fam=fam,
                varvar=varb, idvar=id, root=root, data = redata)
-summary(aout4)
 
-anova(aout2, aout3) # ms*garden fits data better than ms+garden
+aout5 <- aster(resp ~ varb + fit : (s.region*g.region), pred=pred, fam=fam,
+               varvar=varb, idvar=id, root=root, data = redata)
+summary(aout5)
 
-anova(aout4, aout3) # ms*garden fits better than ms*g.region
+anova(aout2, aout3) # ms * garden fits better???
+
+anova(aout0, aout2)
+
+anova(aout1, aout3)
+
+anova(aout1, aout2) # ms*garden fits better than ms*g.region
+
+anova(aout4, aout5)
 
 anova(rout1, rout2)
 
 
 
 
-rout1 <- reaster(resp ~ varb + fit : (ms * garden), list(pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
-summary(rout)
+routX <- reaster(resp ~ varb + fit : (ms * garden), list(pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+
+rout.noX <- reaster(resp ~ varb + fit : (ms + garden), list(pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+
 
 rout2 <- reaster(resp ~ varb + fit : (ms * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
 summary(rout2)
@@ -124,6 +137,11 @@ summary(rout2)
 # garden and pop have 0 estimates and NA for other values...msS:g.regionS.g has p of .075
 rout3 <- reaster(resp ~ varb + fit : (ms * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
 summary(rout3)
+
+rout4 <- reaster(resp ~ varb + fit : (s.region * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+
+
+anova(rout1, rout2)
 
 ##### predicted values GARDEN ###### (from slides)
 pout <- predict(aout3, se.fit = TRUE) #for fixed model
@@ -200,6 +218,7 @@ ggplot(data=foo.1, aes(y=estimates, x=garden, fill=ms))+
 ######
 ##### predicted values G.REGION ###### (from slides)
 ######
+
 pout <- predict(aout4, se.fit = TRUE) #for fixed model
 #pout <- predict(rout, se.fit = TRUE) #for mixed model, nm doesn't work
 
@@ -270,3 +289,80 @@ ggplot(data=foo.1, aes(y=estimates, x=g.region, fill=ms))+
   geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
   geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
   theme_bw()
+
+
+######
+##### predicted values G.REGION ###### (from slides)
+######
+
+pout <- predict(aout5, se.fit = TRUE) #for fixed model
+#pout <- predict(rout, se.fit = TRUE) #for mixed model, nm doesn't work
+
+
+fred <- data.frame(s.region = levels(redata$s.region), g.region=rep(levels(redata$g.region), each=4), root = 1,
+                   surv.2015=1, surv.2016=1, surv.2017=1, surv.2018=1, surv.2019=1,
+                   flower.2016=1, flower.2017=1, flower.2018=1, flower.2019=1,
+                   budnum.2016=1, budnum.2017=1, budnum.2018=1, budnum.2019=1)
+fred
+
+renewdata <- reshape(fred, varying = list(vars), direction = "long", timevar = "varb", times = as.factor(vars), v.names = "resp")
+layer <- gsub("[0-9]", "", as.character(renewdata$varb))
+renewdata <- data.frame(renewdata, layer = layer)
+fit <- as.numeric(layer == "budnum.")
+renewdata <- data.frame(renewdata, fit = fit)
+
+names(renewdata)
+
+pout <- predict(aout5, newdata = renewdata, varvar = varb, idvar = id, root = root, se.fit = TRUE)
+sapply(pout, class)
+
+sapply(pout, length)
+
+renewdata$id
+
+as.character(renewdata$varb)
+
+nnode <- length(vars)
+sally <- matrix(pout$fit, ncol = nnode)
+dim(sally)
+
+renewdata2 <- unite_(renewdata, "s.region_g.region", c("s.region", "g.region"))
+
+rownames(sally) <- unique(as.character(renewdata2$s.region_g.region))
+colnames(sally) <- unique(as.character(renewdata2$varb))
+
+herman <- sally[ , grepl("budnum", colnames(sally))]
+herman
+
+rowSums(herman)
+
+npop <- nrow(fred)
+nnode <- length(vars)
+amat <- array(0, c(npop, nnode, npop))
+dim(amat)
+
+foo <- grepl("budnum", vars)
+for (k in 1:npop) amat[k, foo, k] <- 1
+
+pout.amat <- predict(aout5, newdata = renewdata, varvar = varb, idvar = id, root = root, se.fit = TRUE, amat = amat)
+pout.amat$fit
+
+foo <- cbind(pout.amat$fit, pout.amat$se.fit)
+rownames(foo) <- unique(as.character(renewdata2$s.region_g.region))
+colnames(foo) <- c("estimates", "std. err.")
+round(foo, 3)
+
+foo.1 <- as.data.frame(foo)
+foo.1 <- setNames(cbind(rownames(foo.1), foo.1, row.names = NULL), 
+                  c("s.region_g.region", "estimates", "std.err"))
+
+foo.1 <- separate(foo.1, "s.region_g.region", sep= "_", c("s.region", "g.region"))
+
+foo.1$s.region <- factor(foo.1$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
+foo.1$g.region <- factor(foo.1$g.region, levels=c("S.g", "SO.g", "AO.g", "A.g"))
+
+ggplot(data=foo.1, aes(y=estimates, x=g.region, fill=s.region))+
+  geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
+  geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
+  theme_bw()+
+  scale_fill_manual(values=c("#F8766D", "orange", "#C77CFF", "#00BFC4"))

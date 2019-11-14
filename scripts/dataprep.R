@@ -14,6 +14,8 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(knitr)
+library(lme4)
+library(ggeffects)
 
 #################
 # Load raw Data #
@@ -245,7 +247,14 @@ ebpps.ms$ebpps <- ebpps.ms$bpp * ebpps.ms$mean.est * ebpps.ms$mean.gspb
 ebpp.pop <- data.frame(buds.per.planted.pop, est.pop[,4])  
 ebpp.pop$ebpp <- ebpp.pop$bpp * ebpp.pop$mean.est
 
+# flowering in year 2
 
+#glmm.est.5 <- glmer(germ.10 ~ s.region*g.region + (1|garden), family=binomial(link="logit"), data=G.dat, control=glmerControl(optimizer="nloptwrap", optCtrl=list(maxfun=2e5)))
+
+flwrY2.glmer <- glmer(flower~ms*g.region+(1|pop), family=binomial(link="logit"), data=H.dat.y2)
+summary(flwrY2.glmer)
+flwrY2.ggfx <- ggpredict(flwrY2.glmer, terms=c("g.region", "ms"))
+plot(flwrY2.ggfx)
 
 ##### Plots #####
 
