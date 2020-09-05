@@ -18,7 +18,7 @@
 # establishment success
 est.ms <- G.dat %>%
   group_by(ms, garden) %>%
-  summarize(mean.est = mean(germ.10, na.rm=TRUE), se.est = std.error(germ.10))
+  summarize(mean.est = mean(germ, na.rm=TRUE), se.est = std.error(germ))
 
 # buds per planted
 budsum.ms <- aster.dat %>%

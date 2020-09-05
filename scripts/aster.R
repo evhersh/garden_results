@@ -15,7 +15,7 @@ library(tidyr)
 
 ##### load data #####
 
-aster.dat <<-read.csv("./data/aster_data_v2.csv", stringsAsFactors = TRUE, strip.white = TRUE, na.string = c("NA",""))
+aster.dat <<-read.csv("./data/aster_data_v3.csv", stringsAsFactors = TRUE, strip.white = TRUE, na.string = c("NA",""))
 
 ##### data prep #####
 # log transform leaf lengths
@@ -92,36 +92,53 @@ fit <- as.numeric(layer == "budnum.")
 redata <- data.frame(redata, fit=fit)
 
 # these work now
-aout0 <- aster(resp ~ varb + fit : (ms), pred=pred, fam=fam, varvar=varb,
-               idvar=id, root=root, data = redata)
+# aout0 <- aster(resp ~ varb + fit : (ms), pred=pred, fam=fam, varvar=varb,
+#                idvar=id, root=root, data = redata)
+# 
+# aout1 <- aster(resp ~ varb + fit : (garden), pred=pred, fam=fam, varvar=varb,
+#                idvar=id, root=root, data = redata)
+# 
+# aout2 <- aster(resp ~ varb + fit : (ms+garden), pred=pred, fam=fam,
+#                varvar=varb, idvar=id, root=root, data = redata)
+# 
+# aout3 <- aster(resp ~ varb + fit : (ms*garden), pred=pred, fam=fam,
+#                varvar=varb, idvar=id, root=root, data = redata)
+# 
+# aout4 <- aster(resp ~ varb + fit : (ms*g.region), pred=pred, fam=fam,
+#                varvar=varb, idvar=id, root=root, data = redata)
 
-aout1 <- aster(resp ~ varb + fit : (garden), pred=pred, fam=fam, varvar=varb,
-               idvar=id, root=root, data = redata)
+aout.full <- aster(resp ~ varb + fit : (s.region*g.region), pred=pred, fam=fam,
+               varvar=varb, idvar=id, root=root, data = redata)
+summary(aout.full)
 
-aout2 <- aster(resp ~ varb + fit : (ms+garden), pred=pred, fam=fam,
+aout.noX <- aster(resp ~ varb + fit : (s.region+g.region), pred=pred, fam=fam,
                varvar=varb, idvar=id, root=root, data = redata)
 
-aout3 <- aster(resp ~ varb + fit : (ms*garden), pred=pred, fam=fam,
-               varvar=varb, idvar=id, root=root, data = redata)
+aout.noX2 <- aster(resp ~ varb + fit : (g.region+s.region), pred=pred, fam=fam,
+                  varvar=varb, idvar=id, root=root, data = redata)
 
-aout4 <- aster(resp ~ varb + fit : (ms*g.region), pred=pred, fam=fam,
-               varvar=varb, idvar=id, root=root, data = redata)
+aout.noS <- aster(resp ~ varb + fit : (g.region), pred=pred, fam=fam,
+                  varvar=varb, idvar=id, root=root, data = redata)
 
-aout5 <- aster(resp ~ varb + fit : (s.region*g.region), pred=pred, fam=fam,
-               varvar=varb, idvar=id, root=root, data = redata)
-summary(aout5)
+aout.noG <- aster(resp ~ varb + fit : (s.region), pred=pred, fam=fam,
+                  varvar=varb, idvar=id, root=root, data = redata)
 
-anova(aout2, aout3) # ms * garden fits better???
+anova(aout.noX, aout.full)
+anova(aout.noS, aout.noX)
+anova(aout.noG, aout.noX2)
 
-anova(aout0, aout2)
 
-anova(aout1, aout3)
-
-anova(aout1, aout2) # ms*garden fits better than ms*g.region
-
-anova(aout4, aout5)
-
-anova(rout1, rout2)
+# anova(aout2, aout3) # ms * garden fits better???
+# 
+# anova(aout0, aout2)
+# 
+# anova(aout1, aout3)
+# 
+# anova(aout1, aout2) # ms*garden fits better than ms*g.region
+# 
+# anova(aout4, aout5)
+# 
+# anova(rout1, rout2)
 
 
 
@@ -138,10 +155,45 @@ summary(rout2)
 rout3 <- reaster(resp ~ varb + fit : (ms * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
 summary(rout3)
 
-rout4 <- reaster(resp ~ varb + fit : (s.region * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout.full <- rout4
+#rout.full <- reaster(resp ~ varb + fit : (s.region * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout.noX <- reaster(resp ~ varb + fit : (s.region + g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout.noX2 <- reaster(resp ~ varb + fit : (g.region + s.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout.noS <- reaster(resp ~ varb + fit : (g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout.noG <- reaster(resp ~ varb + fit : (s.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+
+anova(rout.noX, rout.full)
+anova(rout.noS, rout.noX)
+anova(rout.noG, rout.noX)
+
+rout2.full <- reaster(resp ~ varb + fit : (s.region * g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout2.noX <- reaster(resp ~ varb + fit : (s.region + g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout2.noS <- reaster(resp ~ varb + fit : (g.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout2.noG <- reaster(resp ~ varb + fit : (s.region), list(garden = ~ 0 + fit : garden, pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+
+anova(rout2.noS, rout2.full)
+
+rout3.full <- reaster(resp ~ varb + fit : (s.region * g.region), list(garden = ~ 0 + fit : garden), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+summary(rout3.full)
+rout4.full <- reaster(resp ~ varb + fit : (s.region * g.region), list(pop = ~ 0 + fit : pop), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+summary(rout4.full)
 
 
-anova(rout1, rout2)
+rout5.full <- reaster(resp ~ varb + fit : (s.region * g.region), list(mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+summary(rout5.full)
+rout5.noX <- reaster(resp ~ varb + fit : (s.region + g.region), list(mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout5.noX2 <- reaster(resp ~ varb + fit : (g.region + s.region), list(mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout5.noS <- reaster(resp ~ varb + fit : (g.region), list(mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+rout5.noG <- reaster(resp ~ varb + fit : (s.region), list(mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+
+anova(rout5.noX,rout5.full)
+
+
+
+rout6.full <- reaster(resp ~ varb + fit : (s.region * g.region), list(garden = ~ 0 + fit : garden, mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
+summary(rout6.full)
+
+rout5.noX <- reaster(resp ~ varb + fit : (s.region * g.region), list(mom = ~ 0 + fit : mom), pred=pred, fam=fam, varvar=varb, idvar=id, root=root, data = redata)
 
 ##### predicted values GARDEN ###### (from slides)
 pout <- predict(aout3, se.fit = TRUE) #for fixed model
@@ -361,8 +413,26 @@ foo.1 <- separate(foo.1, "s.region_g.region", sep= "_", c("s.region", "g.region"
 foo.1$s.region <- factor(foo.1$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
 foo.1$g.region <- factor(foo.1$g.region, levels=c("S.g", "SO.g", "AO.g", "A.g"))
 
+#full
 ggplot(data=foo.1, aes(y=estimates, x=g.region, fill=s.region))+
   geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
   geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
   theme_bw()+
-  scale_fill_manual(values=c("#F8766D", "orange", "#C77CFF", "#00BFC4"))
+  scale_fill_manual(values=c("#F8766D", "orange", "#C77CFF", "#00BFC4"))+
+  labs(x="g.region", y="lifetime flower bud production")
+
+# S and SO only
+ggplot(data=subset(foo.1, s.region == "S.s" | s.region == "SO.s"), aes(y=estimates, x=g.region, fill=s.region))+
+  geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
+  geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
+  theme_bw()+
+  scale_fill_manual(values=c("#F8766D", "orange"))+
+  labs(x="g.region", y="lifetime flower bud production")
+
+# AO and A only
+ggplot(data=subset(foo.1, s.region == "A.s" | s.region == "AO.s"), aes(y=estimates, x=g.region, fill=s.region))+
+  geom_point(position=position_dodge(width=0.4), pch=21, size=4)+
+  geom_errorbar(aes(ymax=estimates+std.err, ymin=estimates-std.err), colour="black", width=0.2, position=position_dodge(width=0.4))+
+  theme_bw()+
+  scale_fill_manual(values=c("#C77CFF", "#00BFC4"))+
+  labs(x="g.region", y="lifetime flower bud production")

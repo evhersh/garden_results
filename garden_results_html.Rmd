@@ -32,12 +32,13 @@ est ~ ms*garden + (1|pop) [*** better fit]
 ```
 I've plotted the predicted means from each model (r package ggeffects) here.
 
-![](Est_sregion.png)
-![](Est_garden.png)
+#![](Est_sregion.png)
+#![](Est_garden.png)
 
 Here's the same for s.region * g.region, which I think better reflects our experimental design...
 
-![](est_ggfx_sregionXgregion.png)
+#![](est_ggfx_sregionXgregion.png)
+
 
 ## aster model
 

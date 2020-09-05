@@ -25,6 +25,9 @@ aster.dat <<-read.csv("./data/garden_data_final_wide.csv", stringsAsFactors = FA
 H.dat <<-read.csv("./data/garden_data_final.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
 G.dat <<-read.csv("./data/mastergermv3.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA","")) 
 S.dat <<-read.csv("./data/seed_2018.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
+R.dat <<-read.csv("./data/garden_root.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
+C.dat <<-read.csv("./data/ClimateNAinput_1901-2018Y.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
+D.dat <<-read.csv("./data/dem_veg.csv", stringsAsFactors = FALSE, strip.white = TRUE, na.string = c("NA",""))
 
 #### Factors, levels, variables, etc #####
 
@@ -47,11 +50,25 @@ aster.dat$ms_p_g <- paste(aster.dat$ms, "-", aster.dat$pop, "-", aster.dat$garde
 
 aster.dat$budsum <- aster.dat$budnum.2014 + aster.dat$budnum.2015 + aster.dat$budnum.2016 + aster.dat$budnum.2017 + aster.dat$budnum.2018 + aster.dat$budnum.2019
 
+aster.dat$percent.cover <- 100 - aster.dat$percent.bare
+
+# D.dat
+D.dat$percent.cover <- 100 - D.dat$percent.bare
+
+# add root data to aster.dat
+aster.dat$root.volume <- R.dat$root.volume[match(aster.dat$id, R.dat$rep)]
+aster.dat$total.volume <- R.dat$total.volume[match(aster.dat$id, R.dat$rep)]
+aster.dat$shoot.volume <- aster.dat$total.volume-aster.dat$root.volume
+aster.dat$RTVratio <- aster.dat$root.volume/aster.dat$total.volume
+aster.dat$RTSratio <- aster.dat$root.volume/aster.dat$shoot.volume
+
+# H.dat
 H.dat$pop <- factor(H.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 H.dat$ms <- factor(H.dat$ms, levels=c("S", "A"))
 H.dat$s.region <- factor(H.dat$s.region, levels=c("S.s", "SO.s", "AO.s", "A.s"))
 H.dat$g.region <- factor(H.dat$g.region, levels=c("S.g", "SO.g", "AO.g", "A.g"))
 H.dat$garden <- factor(H.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
+
 
 G.dat$pop <- factor(G.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 G.dat$ms <- factor(G.dat$ms, levels=c("S", "A"))
@@ -65,6 +82,7 @@ G.dat$ms_p_g <- paste(G.dat$ms, "-", G.dat$pop, "-", G.dat$garden)
 S.dat$pop <- factor(S.dat$pop, levels=c("B53", "B42", "B46", "B49", "L11", "L12", "L06", "L16", "L17", "C86", "C85", "C27"))
 S.dat$ms <- factor(S.dat$ms, levels=c("S", "A"))
 S.dat$garden <- factor(S.dat$garden, levels=c("SS1", "SS2", "SO1", "SO2", "AO1", "AO2", "AA1", "AA2"))
+S.dat$g.region <- factor(S.dat$g.region, levels=c("S.g", "SO.g", "AO.g", "A.g"))
 
 save(aster.dat, H.dat, file="aster_example2_Hersh.RData")
 
@@ -142,6 +160,11 @@ surv.means.ms.all <- H.dat %>%
   filter(year>0)%>%
   summarize(surv.mean = mean(surv), surv.se=std.error(surv))
 
+surv.means.ms.all <- H.dat %>%
+  group_by(ms, garden, year) %>%
+  filter(year>0)%>%
+  summarize(surv.mean = mean(surv), surv.se=std.error(surv))
+
 length.means.ms.all <- H.dat %>%
   group_by(ms, garden, year) %>%
   filter(year>0)%>%
@@ -193,6 +216,11 @@ num.planted <- H.dat %>%
   filter(year==0) %>%
   summarize(n=n())
 
+num.planted.sregion <- H.dat %>%
+  group_by(s.region, g.region) %>%
+  filter(year==0) %>%
+  summarize(n=n())
+
 num.planted.pop <- H.dat %>%
   group_by(pop, ms, garden) %>%
   filter(year==0) %>%
@@ -202,12 +230,19 @@ budsum.ms <- H.dat %>%
   group_by(ms, garden) %>%
   summarize(bud.sum = sum(bud.num, na.rm=TRUE))
 
+budsum.s.region <- H.dat %>%
+  group_by(s.region, g.region) %>%
+  summarize(bud.sum = sum(bud.num, na.rm=TRUE))
+
 budsum.pop <- H.dat %>%
   group_by(pop, ms, garden) %>%
   summarize(bud.sum = sum(bud.num, na.rm=TRUE))
 
 buds.per.planted <- data.frame(budsum.ms[,1:3], num.planted[,3])
 buds.per.planted$bpp <- buds.per.planted$bud.sum/buds.per.planted$n
+
+buds.per.planted.sregion <- data.frame(budsum.s.region[,1:3], num.planted.sregion[,3])
+buds.per.planted.sregion$bpp <- buds.per.planted.sregion$bud.sum/buds.per.planted.sregion$n
 
 buds.per.planted.pop <- data.frame(budsum.pop[,1:4], num.planted.pop[,4])
 buds.per.planted.pop$bpp <- buds.per.planted.pop$bud.sum/buds.per.planted.pop$n
@@ -246,6 +281,15 @@ ebpps.ms$ebpps <- ebpps.ms$bpp * ebpps.ms$mean.est * ebpps.ms$mean.gspb
 
 ebpp.pop <- data.frame(buds.per.planted.pop, est.pop[,4])  
 ebpp.pop$ebpp <- ebpp.pop$bpp * ebpp.pop$mean.est
+
+ebpps.region <- data.frame(buds.per.planted.sregion, est.s.region[,3])
+ebpps.region$ebpp <- ebpps.region$bpp * ebpps.region$mean.est
+# gspb S = 31.5, A = 39.2
+ebpps.region[1:8,8] <- 31.5
+ebpps.region[9:16,8] <- 39.2
+ebpps.region$ebpps <- ebpps.region$ebpp * ebpps.region$V8
+
+
 
 # flowering in year 2
 
@@ -326,6 +370,12 @@ gg.bpp <- ggplot(data=buds.per.planted, aes(x=garden, y=bpp, colour=ms, group=ms
   geom_bar(aes(fill=ms), colour="black", stat="identity", size=1, position="dodge")+
   theme_bw()+
   labs(y = "buds per individual planted", x = "Garden")
+
+gg.bpp.sregion <- ggplot(data=buds.per.planted.sregion, aes(x=g.region, y=bpp, colour=s.region, group=s.region))+
+  geom_bar(aes(fill=s.region), colour="black", stat="identity", size=1, position="dodge")+
+  theme_bw()+
+  labs(y = "buds per individual planted", x = "g.region")+
+  scale_fill_manual(values=c("#F8766D", "orange", "#C77CFF", "#00BFC4"))
 
 gg.bpp.pop <- ggplot(data=buds.per.planted.pop, aes(x=pop, y=bpp, group=ms))+
   geom_bar(aes(fill=ms), stat="identity", colour="black", size=1)+

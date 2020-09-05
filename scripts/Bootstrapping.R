@@ -9,8 +9,8 @@ library(lattice)
 library(ggplot2)
 library(knitr)
 library(rsample)
-#library(plyr)
-#library(dplyr)
+library(plyr)
+library(dplyr)
 require(Hmisc)
 require(tidyverse)
 
@@ -123,7 +123,7 @@ for (k in 1:n.boot) {
   
   est.ms <- G.data.rep %>%
     dplyr::group_by(ms, garden) %>%
-    dplyr::summarize(mean.est = mean(germ.10, na.rm=TRUE), se.est = std.error(germ.10))
+    dplyr::summarize(mean.est = mean(germ, na.rm=TRUE), se.est = std.error(germ))
   
   G.means$ms <- est.ms$ms 
   G.means$garden <- est.ms$garden
@@ -171,7 +171,7 @@ bootstrapped.means$ms_g <- paste(bootstrapped.means$ms, "-", bootstrapped.means$
 
 est.ms <- G.dat %>%
   dplyr::group_by(ms, garden) %>%
-  dplyr::summarize(mean.est = mean(germ.10, na.rm=TRUE), se.est = std.error(germ.10))
+  dplyr::summarize(mean.est = mean(germ, na.rm=TRUE), se.est = std.error(germ))
 
 budsum.ms <- aster.dat %>%
   dplyr::group_by(ms, garden) %>%

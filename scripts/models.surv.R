@@ -14,6 +14,50 @@ library(lme4)
 library(emmeans)
 library(AER)
 
+glmer.surv.y1 <- glmer(surv~s.region*g.region+(1|pop)+(1|garden), family=binomial(link="logit"), data=H.dat.y1)
+glmer.surv.y1.2 <- glmer(surv~s.region+g.region+(1|pop)+(1|garden), family=binomial(link="logit"), data=H.dat.y1)
+anova(glmer.surv.y1, glmer.surv.y1.2)
+
+glmer.surv.y2 <- glmer(surv~s.region*g.region+(1|pop)+(1|garden), family=binomial(link="logit"), data=H.dat.y2)
+glmer.surv.y2.2 <- glmer(surv~s.region+g.region+(1|pop)+(1|garden), family=binomial(link="logit"), data=H.dat.y2)
+anova(glmer.surv.y2, glmer.surv.y2.2)
+
+glm.surv.y3 <- glm(surv~s.region*g.region, family=binomial(link="logit"), data=H.dat.y3)
+glm.surv.y3.2 <- glm(surv~s.region+g.region, family=binomial(link="logit"), data=H.dat.y3)
+lrtest(glm.surv.y3, glm.surv.y3.2)
+
+glmer.surv.y4 <- glmer(surv~s.region*g.region+(1|garden), family=binomial(link="logit"), data=H.dat.y4)
+glmer.surv.y4.2 <- glmer(surv~s.region+g.region+(1|garden), family=binomial(link="logit"), data=H.dat.y4)
+anova(glmer.surv.y4, glmer.surv.y4.2)
+
+glm.surv.y5 <- glm(surv~s.region*g.region, family=binomial(link="logit"), data=H.dat.y5)
+glm.surv.y5.2 <- glm(surv~s.region+g.region, family=binomial(link="logit"), data=H.dat.y5)
+lrtest(glm.surv.y5, glm.surv.y5.2)
+
+glmer.surv.y1.ggfx <- ggpredict(glmer.surv.y1, terms=c("g.region", "s.region"))
+plot(glmer.surv.y1.ggfx)
+
+glmer.surv.y2.ggfx <- ggpredict(glmer.surv.y2, terms=c("g.region", "s.region"))
+plot(glmer.surv.y2.ggfx)
+
+glm.surv.y3.ggfx <- ggpredict(glm.surv.y3, terms=c("g.region", "s.region"))
+plot(glm.surv.y3.ggfx)
+
+glmer.surv.y4.ggfx <- ggpredict(glmer.surv.y4, terms=c("g.region", "s.region"))
+plot(glmer.surv.y4.ggfx)
+
+glm.surv.y5.ggfx <- ggpredict(glm.surv.y5, terms=c("g.region", "s.region"))
+plot(glm.surv.y5.ggfx)
+
+glmer.surv.y1.ggfxdf <- as.data.frame(glmer.surv.y1.ggfx)
+glmer.surv.y2.ggfxdf <- as.data.frame(glmer.surv.y2.ggfx)
+glm.surv.y3.ggfxdf <- as.data.frame(glm.surv.y3.ggfx)
+glmer.surv.y4.ggfxdf <- as.data.frame(glmer.surv.y4.ggfx)
+glm.surv.y5.ggfxdf <- as.data.frame(glm.surv.y5.ggfx)
+
+
+
+
 ###########
 ### EXPLORATION
 ####

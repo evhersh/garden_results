@@ -113,7 +113,26 @@ with(redata, class(fit))
 
 ##### Fit Model #####
 # remove inds with missing data (put back if I take out size variables):
-# AO2$261, SO2#321, AA2#23, AA1#86, AA1#96, AA2#197, AA2#53, AA2#131, AO2#158, AO1#74, AA1#131, AA2#114, AA2#125, AA1#283, AO2#211, AO2#229, AA2#147, AA1#173, AO1#144, AO2#170
+# AO2$261, 
+# SO2#321, 
+# AA2#23,
+# AA1#86, 
+# AA1#96,
+# AA2#197,
+# AA2#53,
+# AA2#131,
+# AO2#158,
+# AO1#74, 
+# AA1#131, 
+#AA2#114, 
+#AA2#125,
+#AA1#283,
+#AO2#211,
+#AO2#229, 
+#AA2#147,
+#AA1#173,
+#AO1#144,
+#AO2#170
 
 # not converging for the model with flowers or with flowers+size...
 

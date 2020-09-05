@@ -16,7 +16,7 @@ require(tidyverse)
 site=unique(H.bootstrapped.data$garden)
 
 # Set number of bootstrap replicate datasets
-n.boot=3000
+n.boot=1000
 
 #*******************************************************************************
 #### 2. Obtain vital rate parameters across all sites for each replicate bootstrap dataset ###

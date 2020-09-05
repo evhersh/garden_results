@@ -39,7 +39,7 @@ for (k in 1:n.boot) {
   
   est.ms <- G.data.rep %>%
     dplyr::group_by(ms, garden) %>%
-    dplyr::summarize(mean.est = mean(germ.10, na.rm=TRUE), se.est = std.error(germ.10))
+    dplyr::summarize(mean.est = mean(germ, na.rm=TRUE), se.est = std.error(germ))
   
   G.means$ms <- est.ms$ms 
   G.means$garden <- est.ms$garden
